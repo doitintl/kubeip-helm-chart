@@ -12,7 +12,7 @@ helm upgrade --install kubeip kubeip/kubeip \
   --version 0.2.0 --namespace kube-system --values my-values.yaml
 ```
 
-Chart 0.2.0 defaults to agent 2.3.0. Set `image.repository` without a tag and
+Chart 0.3.0 defaults to agent 2.4.0. Set `image.repository` without a tag and
 `image.tag` to select another agent version. Configure `cloudProvider`, provider
 credentials, and `daemonSet.nodeSelector` for your cluster before installation.
 See the [agent setup guide](https://github.com/doitintl/kubeip#readme) for provider permissions.
@@ -24,10 +24,9 @@ without waiting for Node status to advertise the IP.
 
 ## Assignment label
 
-Chart 0.2.1 adds `daemonSet.env.LABEL_ASSIGNED_ADDRESS`, disabled by default.
+Chart 0.3.0 adds `daemonSet.env.LABEL_ASSIGNED_ADDRESS`, disabled by default.
 Enable it with `rbac.allowNodesPatchPermission=true` and select an agent image
-containing `--label-assigned-address`. Agent 2.3.0 does not include this feature;
-this chart retains that default image until a newer agent is released.
+containing `--label-assigned-address`. Agent 2.4.0 includes this feature and is the default image.
 
 The feature restores the v1 `kubip_assigned` Node label without copying or deleting
 other labels. IPv4 dots become hyphens. The label is removed before address release
@@ -53,13 +52,13 @@ Artifact Hub registration is optional and separate from hosting the chart.
 
 ### AWS IPAM configuration
 
-The draft chart exposes `daemonSet.env.AWS_IPAM_POOL_ID` (empty by default) and `daemonSet.env.RELEASE_ON_EXIT` (true by default). IPAM requires a compatible unreleased agent image, `cloudProvider=aws`, an empty `daemonSet.env.FILTER`, and Node patch permission. Agent 2.3.0 does not support IPAM. Leave the pool ID empty for GCP validation.
+The chart exposes `daemonSet.env.AWS_IPAM_POOL_ID` (empty by default) and `daemonSet.env.RELEASE_ON_EXIT` (true by default). IPAM requires agent 2.4.0 or later, `cloudProvider=aws`, an empty `daemonSet.env.FILTER`, and Node patch permission. Leave the pool ID empty for GCP validation.
 
-For AWS IPAM, set `rbac.allowNodesPatchPermission=true` and use `RELEASE_ON_EXIT=false` when checking restart reuse. With release enabled, normal shutdown returns owned allocations to the pool. See the agent branch's `docs/aws-ipam.md` for IAM permissions, retained reservations after failure, manual recovery, and the AWS test matrix. This draft must not be published until a compatible agent is released and its image version is selected.
+For AWS IPAM, set `rbac.allowNodesPatchPermission=true` and use `RELEASE_ON_EXIT=false` when checking restart reuse. With release enabled, normal shutdown returns owned allocations to the pool. See the agent repository’s `docs/aws-ipam.md` for IAM permissions, retained reservations after failure, manual recovery, and the AWS test matrix.
 
-### Metrics and GCP lifecycle candidates
+### Metrics and GCP lifecycle settings
 
-The draft also exposes `daemonSet.env.METRICS_ADDRESS` (empty), `RECONCILE_INTERVAL` (`0s`), and `COMPLETION_TAINT_KEY` (empty). These defaults disable the new behavior. They require the unreleased agent candidate, not 2.3.0.
+The chart also exposes `daemonSet.env.METRICS_ADDRESS` (empty), `RECONCILE_INTERVAL` (`0s`), and `COMPLETION_TAINT_KEY` (empty). These defaults disable the new behavior. They require agent 2.4.0 or later.
 
 For GCP drift tests, use `METRICS_ADDRESS=:8080`, `RECONCILE_INTERVAL=30s`, `RELEASE_ON_EXIT=false`, and `rbac.allowNodesPatchPermission=true`. Leave `AWS_IPAM_POOL_ID` and `COMPLETION_TAINT_KEY` empty. The metrics listener can be scraped directly on the pod IP and configured port; this chart does not install a metrics Service or Prometheus resources.
 

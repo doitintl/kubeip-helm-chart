@@ -9,7 +9,7 @@ namespaceOverride: kube-system
 # Configuration settings for the container image.
 image:
   repository: doitintl/kubeip-agent
-  tag: "2.3.0"
+  tag: "2.4.0"
 
 # Configuration for the Kubernetes Service Account.
 serviceAccount:
