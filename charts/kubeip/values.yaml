@@ -35,7 +35,8 @@ secrets:
 
 # DaemonSet configuration.
 daemonSet:
-  terminationGracePeriodSeconds: 30
+  # Allow the agent's five-minute address release timeout plus shutdown overhead.
+  terminationGracePeriodSeconds: 330
   priorityClassName: system-node-critical
   nodeSelector:
     nodegroup: public
