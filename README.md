@@ -51,11 +51,11 @@ Existing release versions are skipped on reruns. Always bump the chart version
 when changing chart contents. The workflow can also be dispatched manually.
 Artifact Hub registration is optional and separate from hosting the chart.
 
-### AWS IPAM lab candidate
+### AWS IPAM configuration
 
 The draft chart exposes `daemonSet.env.AWS_IPAM_POOL_ID` (empty by default) and `daemonSet.env.RELEASE_ON_EXIT` (true by default). IPAM requires a compatible unreleased agent image, `cloudProvider=aws`, an empty `daemonSet.env.FILTER`, and Node patch permission. Agent 2.3.0 does not support IPAM. Leave the pool ID empty for GCP validation.
 
-For the AWS lab, set `rbac.allowNodesPatchPermission=true` and use `RELEASE_ON_EXIT=false` when checking restart reuse. With release enabled, normal shutdown returns owned allocations to the pool. See the agent branch's `docs/lab/aws-ipam.md` for IAM permissions, retained reservations after failure, manual recovery, and the AWS test matrix. This draft must not be published until a compatible agent is released and its image version is selected.
+For AWS IPAM, set `rbac.allowNodesPatchPermission=true` and use `RELEASE_ON_EXIT=false` when checking restart reuse. With release enabled, normal shutdown returns owned allocations to the pool. See the agent branch's `docs/aws-ipam.md` for IAM permissions, retained reservations after failure, manual recovery, and the AWS test matrix. This draft must not be published until a compatible agent is released and its image version is selected.
 
 ### Metrics and GCP lifecycle candidates
 
@@ -63,4 +63,4 @@ The draft also exposes `daemonSet.env.METRICS_ADDRESS` (empty), `RECONCILE_INTER
 
 For GCP drift tests, use `METRICS_ADDRESS=:8080`, `RECONCILE_INTERVAL=30s`, `RELEASE_ON_EXIT=false`, and `rbac.allowNodesPatchPermission=true`. Leave `AWS_IPAM_POOL_ID` and `COMPLETION_TAINT_KEY` empty. The metrics listener can be scraped directly on the pod IP and configured port; this chart does not install a metrics Service or Prometheus resources.
 
-For completion-taint tests, leave `RECONCILE_INTERVAL=0s`, set a completion taint distinct from `TAINT_KEY`, and retain `RELEASE_ON_EXIT=false` and Node patch permission. Configure both taints on the node-pool template. Ordinary workloads tolerate the readiness taint but not completion; workloads requiring reserved addresses tolerate neither. Completion mode retains terminal state across restarts and removes its taint only after success or confirmed pool exhaustion. It cannot be combined with IPAM or drift repair. Follow the agent's `docs/lab/gcp.md` for failure cases, retained addresses and state reset procedures.
+For completion-taint tests, leave `RECONCILE_INTERVAL=0s`, set a completion taint distinct from `TAINT_KEY`, and retain `RELEASE_ON_EXIT=false` and Node patch permission. Configure both taints on the node-pool template. Ordinary workloads tolerate the readiness taint but not completion; workloads requiring reserved addresses tolerate neither. Completion mode retains terminal state across restarts and removes its taint only after success or confirmed pool exhaustion. It cannot be combined with IPAM or drift repair. Follow the agent's `docs/lifecycle.md` for failure cases, retained addresses and state reset procedures.
