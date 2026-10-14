@@ -1,3 +1,14 @@
+{{- if .Values.daemonSet.env.AWS_IPAM_POOL_ID }}
+{{- if ne .Values.cloudProvider "aws" }}
+{{- fail "AWS_IPAM_POOL_ID requires cloudProvider=aws" }}
+{{- end }}
+{{- if .Values.daemonSet.env.FILTER }}
+{{- fail "AWS_IPAM_POOL_ID requires an empty FILTER" }}
+{{- end }}
+{{- if and .Values.rbac.create (not .Values.rbac.allowNodesPatchPermission) }}
+{{- fail "AWS_IPAM_POOL_ID requires rbac.allowNodesPatchPermission=true" }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -54,6 +65,18 @@ spec:
               value: {{ .Values.daemonSet.env.FILTER | quote }}
             - name: TAINT_KEY
               value: {{ .Values.daemonSet.env.TAINT_KEY | quote }}
+            - name: LABEL_ASSIGNED_ADDRESS
+              value: {{ .Values.daemonSet.env.LABEL_ASSIGNED_ADDRESS | default false | quote }}
+            - name: METRICS_ADDRESS
+              value: {{ .Values.daemonSet.env.METRICS_ADDRESS | default "" | quote }}
+            - name: RECONCILE_INTERVAL
+              value: {{ .Values.daemonSet.env.RECONCILE_INTERVAL | default "0s" | quote }}
+            - name: COMPLETION_TAINT_KEY
+              value: {{ .Values.daemonSet.env.COMPLETION_TAINT_KEY | default "" | quote }}
+            - name: AWS_IPAM_POOL_ID
+              value: {{ .Values.daemonSet.env.AWS_IPAM_POOL_ID | default "" | quote }}
+            - name: RELEASE_ON_EXIT
+              value: {{ .Values.daemonSet.env.RELEASE_ON_EXIT | quote }}
             - name: WAIT_FOR_NODE_ADDRESS
               value: {{ .Values.daemonSet.env.WAIT_FOR_NODE_ADDRESS | quote }}
             - name: LOG_LEVEL

@@ -9,7 +9,7 @@ namespaceOverride: kube-system
 # Configuration settings for the container image.
 image:
   repository: doitintl/kubeip-agent
-  tag: "2.3.0"
+  tag: "2.4.0"
 
 # Configuration for the Kubernetes Service Account.
 serviceAccount:
@@ -35,7 +35,8 @@ secrets:
 
 # DaemonSet configuration.
 daemonSet:
-  terminationGracePeriodSeconds: 30
+  # Allow the agent's five-minute address release timeout plus shutdown overhead.
+  terminationGracePeriodSeconds: 330
   priorityClassName: system-node-critical
   nodeSelector:
     nodegroup: public
@@ -44,6 +45,12 @@ daemonSet:
     FILTER: labels.kubeip=reserved;labels.environment=demo
     TAINT_KEY: ""
     WAIT_FOR_NODE_ADDRESS: true
+    LABEL_ASSIGNED_ADDRESS: false
+    AWS_IPAM_POOL_ID: ""
+    METRICS_ADDRESS: ""
+    RECONCILE_INTERVAL: "0s"
+    COMPLETION_TAINT_KEY: ""
+    RELEASE_ON_EXIT: true
     LOG_LEVEL: debug
     LOG_JSON: true
   resources:
