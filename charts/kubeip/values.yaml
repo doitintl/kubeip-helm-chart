@@ -44,6 +44,7 @@ daemonSet:
     FILTER: labels.kubeip=reserved;labels.environment=demo
     TAINT_KEY: ""
     WAIT_FOR_NODE_ADDRESS: true
+    LABEL_ASSIGNED_ADDRESS: false
     LOG_LEVEL: debug
     LOG_JSON: true
   resources:

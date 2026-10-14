@@ -22,6 +22,18 @@ When using taints, set `daemonSet.env.TAINT_KEY` and
 to true. Set it to false only when workloads can start after cloud assignment
 without waiting for Node status to advertise the IP.
 
+## Assignment label
+
+Chart 0.2.1 adds `daemonSet.env.LABEL_ASSIGNED_ADDRESS`, disabled by default.
+Enable it with `rbac.allowNodesPatchPermission=true` and select an agent image
+containing `--label-assigned-address`. Agent 2.3.0 does not include this feature;
+this chart retains that default image until a newer agent is released.
+
+The feature restores the v1 `kubip_assigned` Node label without copying or deleting
+other labels. IPv4 dots become hyphens. The label is removed before address release
+and restored after successful assignment, including agent restarts.
+`WAIT_FOR_NODE_ADDRESS` also controls waiting before setting this label.
+
 ## Publishing
 
 This follows the DoiT EKS Lens pattern: GitHub Releases host chart archives,

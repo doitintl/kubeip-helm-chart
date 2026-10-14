@@ -28,9 +28,10 @@ jobs:
         run: |
           helm lint charts/kubeip --strict
           helm template kubeip charts/kubeip > rendered.yaml
-          helm template kubeip charts/kubeip --set image.tag=test-version --set daemonSet.env.WAIT_FOR_NODE_ADDRESS=false > rendered.yaml
+          helm template kubeip charts/kubeip --set image.tag=test-version --set daemonSet.env.WAIT_FOR_NODE_ADDRESS=false --set daemonSet.env.LABEL_ASSIGNED_ADDRESS=true --set rbac.allowNodesPatchPermission=true > rendered.yaml
           grep -F 'image: "doitintl/kubeip-agent:test-version"' rendered.yaml
           grep -A1 'name: WAIT_FOR_NODE_ADDRESS' rendered.yaml | grep -F 'value: "false"'
+          grep -A1 'name: LABEL_ASSIGNED_ADDRESS' rendered.yaml | grep -F 'value: "true"'
 
   release:
     needs: validate
