@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   kubeip:
   - apiVersion: v2
+    appVersion: 2.4.0
+    created: "2026-10-14T21:38:27.596068527Z"
+    description: A Helm chart for KubeIP
+    digest: d819c5296540f8a491265a598fc745f4b2ac9c3d2c319fc1a83e703b48e5e80d
+    home: https://kubeip.com
+    name: kubeip
+    sources:
+    - https://github.com/doitintl/kubeip
+    - https://github.com/doitintl/kubeip-helm-chart
+    urls:
+    - https://github.com/doitintl/kubeip-helm-chart/releases/download/kubeip-0.3.0/kubeip-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: 2.3.0
     created: "2026-10-14T18:10:15.863191404Z"
     description: A Helm chart for KubeIP
@@ -14,4 +27,4 @@ entries:
     urls:
     - https://github.com/doitintl/kubeip-helm-chart/releases/download/kubeip-0.2.0/kubeip-0.2.0.tgz
     version: 0.2.0
-generated: "2026-10-14T18:10:15.86320547Z"
+generated: "2026-10-14T21:38:27.596073966Z"
