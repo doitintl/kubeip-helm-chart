@@ -32,6 +32,13 @@ jobs:
           grep -F 'image: "doitintl/kubeip-agent:test-version"' rendered.yaml
           grep -A1 'name: WAIT_FOR_NODE_ADDRESS' rendered.yaml | grep -F 'value: "false"'
           grep -A1 'name: LABEL_ASSIGNED_ADDRESS' rendered.yaml | grep -F 'value: "true"'
+          helm template kubeip charts/kubeip --set cloudProvider=aws --set-string serviceAccount.annotations.awsRoleArn=arn:aws:iam::123456789012:role/kubeip-lab --set-string daemonSet.env.FILTER= --set-string daemonSet.env.AWS_IPAM_POOL_ID=ipam-pool-lab --set rbac.allowNodesPatchPermission=true --set daemonSet.env.RELEASE_ON_EXIT=false > rendered.yaml
+          grep -A1 'name: AWS_IPAM_POOL_ID' rendered.yaml | grep -F 'value: "ipam-pool-lab"'
+          grep -A1 'name: RELEASE_ON_EXIT' rendered.yaml | grep -F 'value: "false"'
+          if helm template kubeip charts/kubeip --set-string daemonSet.env.AWS_IPAM_POOL_ID=ipam-pool-lab; then
+            echo "IPAM must reject the GCP provider"
+            exit 1
+          fi
 
   release:
     needs: validate

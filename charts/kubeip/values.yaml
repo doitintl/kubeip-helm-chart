@@ -45,6 +45,8 @@ daemonSet:
     TAINT_KEY: ""
     WAIT_FOR_NODE_ADDRESS: true
     LABEL_ASSIGNED_ADDRESS: false
+    AWS_IPAM_POOL_ID: ""
+    RELEASE_ON_EXIT: true
     LOG_LEVEL: debug
     LOG_JSON: true
   resources:

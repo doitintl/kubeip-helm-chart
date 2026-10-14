@@ -50,3 +50,9 @@ GitHub Pages serves the index, and `helm/chart-releaser-action` publishes using
 Existing release versions are skipped on reruns. Always bump the chart version
 when changing chart contents. The workflow can also be dispatched manually.
 Artifact Hub registration is optional and separate from hosting the chart.
+
+### AWS IPAM lab candidate
+
+The draft chart exposes `daemonSet.env.AWS_IPAM_POOL_ID` (empty by default) and `daemonSet.env.RELEASE_ON_EXIT` (true by default). IPAM requires a compatible unreleased agent image, `cloudProvider=aws`, an empty `daemonSet.env.FILTER`, and Node patch permission. Agent 2.3.0 does not support IPAM. Leave the pool ID empty for GCP validation.
+
+For the AWS lab, set `rbac.allowNodesPatchPermission=true` and use `RELEASE_ON_EXIT=false` when checking restart reuse. With release enabled, normal shutdown returns owned allocations to the pool. See the agent branch's `docs/lab/aws-ipam.md` for IAM permissions, retained reservations after failure, manual recovery, and the AWS test matrix. This draft must not be published until a compatible agent is released and its image version is selected.
