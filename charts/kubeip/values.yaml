@@ -1,0 +1,55 @@
+# The cloud provider where your Kubernetes cluster is running.
+# This value determines the appropriate annotations for the Service Account.
+# Currently acceptable values are 'gcp' or 'aws' or 'oci'.
+cloudProvider: gcp
+
+# The namespace where the kubeip-agent will be deployed.
+namespaceOverride: kube-system
+
+# Configuration settings for the container image.
+image:
+  repository: doitintl/kubeip-agent
+  tag: "2.3.0"
+
+# Configuration for the Kubernetes Service Account.
+serviceAccount:
+  create: true
+  name: kubeip-service-account
+  annotations:
+    gcpServiceAccountEmail: kubeip-service-account@workload-id-117715.iam.gserviceaccount.com
+    # annotations:
+    #   awsRoleArn: "your-aws-role-arn"
+    #   gcpServiceAccountEmail: "your-google-service-account-email"
+
+
+# Role-Based Access Control (RBAC) configuration.
+rbac:
+  create: true
+  allowNodesPatchPermission: false
+
+# Secret configuration for oci users.
+secrets:
+  create: true
+  oci_config: "" # base64 encoded oci config file
+  oci_oci_api_key: "" # base64 encoded oci api key file
+
+# DaemonSet configuration.
+daemonSet:
+  terminationGracePeriodSeconds: 30
+  priorityClassName: system-node-critical
+  nodeSelector:
+    nodegroup: public
+    kubeip: use
+  env:
+    FILTER: labels.kubeip=reserved;labels.environment=demo
+    TAINT_KEY: ""
+    WAIT_FOR_NODE_ADDRESS: true
+    LOG_LEVEL: debug
+    LOG_JSON: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

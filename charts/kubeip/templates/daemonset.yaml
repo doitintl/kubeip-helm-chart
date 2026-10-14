@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kubeip.fullname" . }}
+  labels:
+    {{- include "kubeip.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kubeip.name" . }}
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kubeip.name" . }}
+    spec:
+      serviceAccountName: {{ include "kubeip.serviceAccountName" . | quote }}
+      terminationGracePeriodSeconds: {{ .Values.daemonSet.terminationGracePeriodSeconds }}
+      priorityClassName: {{ .Values.daemonSet.priorityClassName | quote }}
+      nodeSelector:
+{{- if .Values.daemonSet.nodeSelector }}
+{{- toYaml .Values.daemonSet.nodeSelector | nindent 8 }}
+{{- end }}
+      tolerations:
+        - operator: "Exists"
+          effect: "NoSchedule"
+        - operator: "Exists"
+          effect: "NoExecute"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: kubeip
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          resources:
+{{- toYaml .Values.daemonSet.resources | nindent 12 }}
+          {{- if eq .Values.cloudProvider "oci" }}
+          volumeMounts:
+            - name: oci-config
+              mountPath: /root/.oci
+          {{- end }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: FILTER
+              value: {{ .Values.daemonSet.env.FILTER | quote }}
+            - name: TAINT_KEY
+              value: {{ .Values.daemonSet.env.TAINT_KEY | quote }}
+            - name: WAIT_FOR_NODE_ADDRESS
+              value: {{ .Values.daemonSet.env.WAIT_FOR_NODE_ADDRESS | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.daemonSet.env.LOG_LEVEL | quote }}
+            - name: LOG_JSON
+              value: {{ .Values.daemonSet.env.LOG_JSON | quote }}
+            {{- if eq .Values.cloudProvider "oci" }}
+            - name: OCI_CONFIG_FILE
+              value: /root/.oci/config
+            {{- end }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+      {{- if eq .Values.cloudProvider "oci" }}
+      volumes:
+        - name: oci-config
+          secret:
+            secretName: oci-config
+      {{- end }}

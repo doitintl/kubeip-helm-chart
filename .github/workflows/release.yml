@@ -1,0 +1,82 @@
+name: Release Charts
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - 'charts/**'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: charts-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: azure/setup-helm@v4
+        with:
+          version: v4.3.0
+      - name: Validate chart
+        run: |
+          helm lint charts/kubeip --strict
+          helm template kubeip charts/kubeip > rendered.yaml
+          grep -F 'image: "doitintl/kubeip-agent:2.3.0"' rendered.yaml
+          helm template kubeip charts/kubeip --set image.tag=test-version --set daemonSet.env.WAIT_FOR_NODE_ADDRESS=false > rendered.yaml
+          grep -F 'image: "doitintl/kubeip-agent:test-version"' rendered.yaml
+          grep -A1 'name: WAIT_FOR_NODE_ADDRESS' rendered.yaml | grep -F 'value: "false"'
+
+  release:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: azure/setup-helm@v4
+        with:
+          version: v4.3.0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Package chart
+        run: helm package charts/kubeip --destination .cr-release-packages
+      - name: Release chart and update index
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          skip_packaging: true
+          skip_existing: true
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: public
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy chart repository
+        id: deployment
+        uses: actions/deploy-pages@v4
