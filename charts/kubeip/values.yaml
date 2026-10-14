@@ -46,6 +46,9 @@ daemonSet:
     WAIT_FOR_NODE_ADDRESS: true
     LABEL_ASSIGNED_ADDRESS: false
     AWS_IPAM_POOL_ID: ""
+    METRICS_ADDRESS: ""
+    RECONCILE_INTERVAL: "0s"
+    COMPLETION_TAINT_KEY: ""
     RELEASE_ON_EXIT: true
     LOG_LEVEL: debug
     LOG_JSON: true
