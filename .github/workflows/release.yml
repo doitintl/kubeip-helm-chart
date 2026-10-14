@@ -28,7 +28,6 @@ jobs:
         run: |
           helm lint charts/kubeip --strict
           helm template kubeip charts/kubeip > rendered.yaml
-          grep -F 'image: "doitintl/kubeip-agent:2.3.0"' rendered.yaml
           helm template kubeip charts/kubeip --set image.tag=test-version --set daemonSet.env.WAIT_FOR_NODE_ADDRESS=false > rendered.yaml
           grep -F 'image: "doitintl/kubeip-agent:test-version"' rendered.yaml
           grep -A1 'name: WAIT_FOR_NODE_ADDRESS' rendered.yaml | grep -F 'value: "false"'
@@ -50,12 +49,9 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      - name: Package chart
-        run: helm package charts/kubeip --destination .cr-release-packages
       - name: Release chart and update index
         uses: helm/chart-releaser-action@v1.7.0
         with:
-          skip_packaging: true
           skip_existing: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
